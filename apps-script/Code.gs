@@ -6,7 +6,13 @@
  *   - source=pantalla      (MacroDroid, Screen content trigger): the "¡Yapeaste!" confirmation screen, i.e. payments you MAKE.
  *
  * Everything is logged to "Raw". Payments you make go to "Gastos", payments you receive to "Ingresos".
- * Setup: see README.md.
+ *
+ * Advanced alternative to the Google Form setup in README.md. To use it:
+ *   1. In a Google Sheet: Extensions -> Apps Script, paste this file, change SECRET, save.
+ *   2. Deploy -> New deployment -> Web app (Execute as: Me, Access: Anyone). Copy the /exec URL.
+ *   3. In both MacroDroid macros, POST form data to that URL with fields:
+ *        token=<SECRET>, source=notificacion|pantalla, title=[notification_title], text=<notification or screen text>
+ *   After editing: Deploy -> Manage deployments -> Edit -> New version (or the URL keeps the old code).
  */
 
 // Change this to a long random string and use the same value on the phone.

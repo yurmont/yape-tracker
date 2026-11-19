@@ -1,89 +1,138 @@
 # yape-tracker
 
-Registra automáticamente en una Google Sheet los yapeos que **recibes** y los que **haces**, desde un celular Android. Solo usa apps gratuitas: **MacroDroid** (versión gratis, hasta 5 macros; aquí se usan 2) y Google Sheets.
+Registra automáticamente en una Google Sheet los yapeos que **recibes** y los que **haces**, desde un celular Android. No hay que programar nada: es un **Google Form** + **MacroDroid** (gratis) + unas fórmulas.
 
 ```
 Te yapean ──► notificación de Yape ──► MacroDroid (macro 1) ─┐
-                                                             ├─ HTTP POST ─► Apps Script ─► Google Sheet
-Yapeas ─────► pantalla "¡Yapeaste!" ─► MacroDroid (macro 2) ─┘                              ├─ Raw      (todo lo recibido)
-                                                                                            ├─ Gastos   (lo que pagaste)
-                                                                                            └─ Ingresos (lo que recibiste)
+                                                             ├─ HTTP POST ─► Google Form ─► Hoja "Respuestas" (texto crudo)
+Yapeas ─────► pantalla "¡Yapeaste!" ─► MacroDroid (macro 2) ─┘                                       │
+                                                                                                     ▼
+                                                                         Hoja "Movimientos" (fórmulas: tipo, monto, persona)
 ```
 
-Yape muestra una notificación cuando te pagan, pero aparentemente no cuando pagas tú. Por eso los gastos se capturan leyendo la pantalla de constancia con el permiso de accesibilidad de Android.
+Yape muestra una notificación cuando te pagan, pero aparentemente no cuando pagas tú. Por eso los gastos se capturan leyendo la pantalla de constancia (permiso de accesibilidad de Android).
 
-## 1. Google Sheet + Apps Script
+---
 
-1. Crea una Google Sheet nueva (por ejemplo "Finanzas personales").
-2. **Extensiones → Apps Script**. Reemplaza el contenido de `Code.gs` por el de [Code.gs](Code.gs).
-3. Cambia `SECRET` por una cadena larga y aleatoria y guarda.
-4. Opcional: selecciona `testParse` y pulsa **Ejecutar** para ver el parser en el registro (la primera vez pide permisos).
-5. **Implementar → Nueva implementación → Aplicación web**
-   - Ejecutar como: **Yo**
-   - Quién tiene acceso: **Cualquier persona** (lo protege el `SECRET`)
-6. Copia la **URL de la aplicación web** (`https://script.google.com/macros/s/…/exec`). Al abrirla en el navegador debe mostrar `ok`.
+## 1. Google Form (en la PC, ~5 min)
 
-> Cada vez que cambies el script: **Implementar → Administrar implementaciones → Editar → Nueva versión**. Si no, la URL sigue ejecutando el código anterior.
+1. Entra a [forms.new](https://forms.new). Título: `Yape tracker`.
+2. Crea **dos preguntas**, sin marcarlas como obligatorias:
+   - `origen` → tipo **Respuesta corta**
+   - `texto` → tipo **Párrafo**
+3. **Configuración → Respuestas:** desactiva *Recopilar direcciones de correo electrónico* y *Limitar a 1 respuesta*. El formulario no debe pedir iniciar sesión.
+4. Pestaña **Respuestas → Vincular con Hojas de cálculo → Crear una hoja de cálculo nueva**. Se crea una hoja con la pestaña `Respuestas de formulario 1`.
 
-## 2. Ingresos: macro 1 (notificaciones)
+### Obtener la URL y los IDs de los campos
 
-**Trigger:** Eventos del dispositivo → **Notificación** → Notificación recibida
-- Aplicación: **Yape**
-- Contenido: **Cualquiera**
-- Concede a MacroDroid el *acceso a notificaciones*.
+5. En el formulario: menú **⋮ → Obtener enlace prellenado**.
+6. Escribe `X` en *origen* y `Y` en *texto* → **Obtener vínculo → Copiar vínculo**. Se ve así:
 
-**Acción:** Conectividad → **Petición HTTP**
-- Método: **POST**, URL: la de la aplicación web
-- Cuerpo: **Form data** con estos campos:
+   ```
+   https://docs.google.com/forms/d/e/1FAIpQL...xyz/viewform?usp=pp_url&entry.111111111=X&entry.222222222=Y
+   ```
 
-| Clave  | Valor |
-|--------|-------|
-| token  | tu `SECRET` |
-| source | `notificacion` |
-| title  | `[notification_title]` (Magic text → título de la notificación) |
-| text   | `[notification]` (Magic text → texto de la notificación) |
+7. Anota tres cosas:
+   - **URL de envío:** la parte hasta `/viewform`, cambiando `viewform` por `formResponse`:
+     `https://docs.google.com/forms/d/e/1FAIpQL...xyz/formResponse`
+   - **ID de origen:** `entry.111111111` (el que tenía `X`)
+   - **ID de texto:** `entry.222222222` (el que tenía `Y`)
 
-## 3. Gastos: macro 2 (pantalla de constancia)
+8. **Prueba:** abre en el navegador (con tus valores):
 
-Crea una variable global de tipo texto, por ejemplo `yape_pantalla` (MacroDroid → Variables).
+   ```
+   https://docs.google.com/forms/d/e/1FAIpQL...xyz/formResponse?entry.111111111=prueba&entry.222222222=Yape!%20Ana%20te%20envi%C3%B3%20un%20pago%20por%20S/%201
+   ```
+
+   Debe decir *"Se registró tu respuesta"* y aparecer una fila nueva en la hoja.
+
+## 2. Pestaña "Movimientos" (fórmulas)
+
+En la hoja vinculada, crea una pestaña nueva llamada `Movimientos`. Escribe estos encabezados en la fila 1 y pega cada fórmula en la **fila 2** de su columna. Cada fórmula se extiende sola a todas las filas.
+
+| Col | Encabezado | Fórmula (fila 2) |
+|-----|------------|------------------|
+| A | Fecha | `=ARRAYFORMULA(IF('Respuestas de formulario 1'!A2:A="",,'Respuestas de formulario 1'!A2:A))` |
+| B | Tipo | `=ARRAYFORMULA(IF(A2:A="",,IF('Respuestas de formulario 1'!B2:B="pantalla","Gasto",IF(REGEXMATCH(LOWER('Respuestas de formulario 1'!C2:C),"te envi\|te yape\|recibiste\|te pag"),"Ingreso",IF(REGEXMATCH('Respuestas de formulario 1'!C2:C,"S/"),"Gasto","Otro")))))` |
+| C | Monto | `=ARRAYFORMULA(IF(A2:A="",,IFERROR(VALUE(SUBSTITUTE(REGEXEXTRACT('Respuestas de formulario 1'!C2:C,"S/\.?[\s\|]*(\d[\d,]*\.?\d*)"),",","")))))` |
+| D | Persona | `=ARRAYFORMULA(IF(A2:A="",,IFERROR(TRIM(REGEXEXTRACT('Respuestas de formulario 1'!C2:C,"([A-ZÁÉÍÓÚÑa-záéíóúñ. ]+?) te (?:envi\|yape\|pag)")),IFERROR(TRIM(REGEXEXTRACT('Respuestas de formulario 1'!C2:C,"(?m)\ba ([^\|\n]+?)(?: por\|\.?$\|\s*\\\|)")),""))))` |
+| E | Importe | `=ARRAYFORMULA(IF(B2:B="Ingreso",C2:C,IF(B2:B="Gasto",-C2:C,)))` |
+| F | Duplicado | `=ARRAYFORMULA(IF(A2:A2000="",,IF(IFERROR((B2:B2000=B1:B1999)*(C2:C2000=C1:C1999)*(A2:A2000-A1:A1999<3/1440),0),"Sí","")))` |
+
+> En la tabla de GitHub, los `\|` son solo para que se muestre bien. **Copia las fórmulas desde [formulas.txt](formulas.txt)**, que las tiene listas para pegar.
+
+- **Tipo:** todo lo que viene de la pantalla es *Gasto*; las notificaciones con "te envió / te yapeó…" son *Ingreso*.
+- **Importe:** positivo para ingresos y negativo para gastos, para sumarlo directo.
+- **Duplicado:** marca *Sí* cuando el mismo tipo y monto se repite en menos de 3 minutos (la pantalla se lee varias veces).
+
+**Totales** (por ejemplo en `H1` y `H2`):
+
+```
+=SUMIFS(C2:C,B2:B,"Ingreso",F2:F,"<>Sí")
+=SUMIFS(C2:C,B2:B,"Gasto",F2:F,"<>Sí")
+```
+
+**Si una fórmula da "Error de análisis":** tu hoja usa `;` como separador. Reemplaza las `,` que separan argumentos por `;`. **Si un monto como 25.00 aparece como 2500:** en **Archivo → Configuración → Configuración regional**, elige **Perú** o **Estados Unidos** (punto decimal).
+
+## 3. MacroDroid (en el celular, ~10 min)
+
+Instala **MacroDroid** (gratis, hasta 5 macros; aquí se usan 2). En las dos macros, la acción **Petición HTTP** es igual:
+- Método: **POST**
+- URL: tu **URL de envío** (`…/formResponse`)
+- Cuerpo: **Form data**
+
+### Macro 1: Ingresos (notificaciones)
+
+**Trigger:** Eventos del dispositivo → **Notificación** → Notificación recibida → App: **Yape**, contenido: **Cualquiera**. Concede el *acceso a notificaciones*.
+
+**Acción:** Petición HTTP con:
+
+| Clave | Valor |
+|-------|-------|
+| `entry.111111111` (tu ID de origen) | `notificacion` |
+| `entry.222222222` (tu ID de texto)  | `[notification_title] [notification]` (Magic text) |
+
+### Macro 2: Gastos (pantalla de constancia)
+
+Crea antes una variable global de texto llamada `yape_pantalla` (MacroDroid → Variables).
 
 **Trigger:** **Screen content** ([wiki](https://macrodroidforum.com/wiki/index.php/Trigger:_Screen_content))
-- Aplicación: **Yape** (no uses "Todas las aplicaciones", consume más batería)
-- Texto a detectar: `*Yapeaste*` (con comodines), al **aparecer**
+- App: **Yape** (no "Todas las aplicaciones")
+- Texto: `*Yapeaste*`, al **aparecer**
 - Frecuencia de lectura: **1–2 s**
-- Concede a MacroDroid el permiso de **accesibilidad** cuando lo pida.
+- Concede el permiso de **accesibilidad**.
 
-**Acciones** (en orden):
-1. **Read Screen Content** → guardar el texto en `yape_pantalla`
-2. **Petición HTTP**: método **POST**, URL de la aplicación web, cuerpo **Form data**:
+**Acciones:**
+1. **Read Screen Content** → guardar en `yape_pantalla`
+2. **Petición HTTP** con:
 
-| Clave  | Valor |
-|--------|-------|
-| token  | tu `SECRET` |
-| source | `pantalla` |
-| text   | `[lv=yape_pantalla]` (Magic text → variable `yape_pantalla`) |
+| Clave | Valor |
+|-------|-------|
+| `entry.111111111` | `pantalla` |
+| `entry.222222222` | `[lv=yape_pantalla]` (Magic text → variable) |
 
-**Restricción (recomendada):** en las opciones de la macro, evita que se repita en menos de **10 s**, porque la pantalla se redibuja varias veces. El script además descarta el mismo pago durante 3 minutos.
+En las opciones de la macro, evita que se repita en menos de **10 s**.
 
-El texto de pantalla puede llegar con un bloque por línea; el script lo convierte a `a | b | c` antes de leerlo.
+**Si no detecta la pantalla:** prueba el trigger **Screenshot Content** ([wiki](https://macrodroidforum.com/wiki/index.php/Trigger:_Screenshot_Content)), que lee la pantalla con OCR. Es menos confiable, pero sirve de respaldo.
 
-**Si no detecta nada:** algunas apps no dejan leer su texto. Prueba el trigger **Screenshot Content** ([wiki](https://macrodroidforum.com/wiki/index.php/Trigger:_Screenshot_Content)), que lee la pantalla con OCR. Es menos confiable, pero sirve como respaldo.
-
-## 4. Batería
+### Batería
 
 Ajustes → Apps → MacroDroid → Batería → **Sin restricciones**. Si no, Android puede cerrarla y se pierden movimientos.
 
-## 5. Calibrar con datos reales
+## 4. Probar
 
-El parser se escribió con textos de ejemplo, no con pantallas reales de Yape. Después de tus primeros movimientos:
+1. Pide que te yapeen S/ 1 → debe aparecer en *Movimientos* como **Ingreso**.
+2. Yapea S/ 1 → debe aparecer como **Gasto**.
+3. Si algo sale mal, mira el texto crudo en `Respuestas de formulario 1` y ajusta las fórmulas de *Movimientos*.
 
-1. Abre la hoja **Raw** y mira el texto exacto que llegó y cómo se clasificó.
-2. Si un monto o un destinatario sale mal, ajusta `EXPENSE_PATTERNS` / `INCOME_PATTERNS` o `screenParty_()` en el script y publica una **nueva versión**.
+## Limitaciones
 
-## Limitaciones conocidas
+- **Cambios en Yape:** si Yape cambia el texto o el diseño de la constancia, los gastos dejan de capturarse hasta ajustar el filtro.
+- **Persona:** si en la pantalla el nombre aparece solo, sin "a" delante, la columna Persona queda vacía. Ajusta la fórmula D con el texto real.
+- **Historial:** abrir el detalle de un yapeo antiguo puede registrarlo como gasto nuevo. Bórralo de la hoja de respuestas.
+- **URL del formulario:** cualquiera que tenga la URL de envío puede agregar filas. No la compartas.
+- **Accesibilidad:** con ese permiso, MacroDroid puede leer todo lo que hay en pantalla. Mantén el filtro solo en Yape.
 
-- **Cambios en Yape:** si Yape cambia el texto o el diseño de la constancia, la captura de gastos deja de funcionar hasta ajustar el filtro. Si un gasto no aparece en Raw, revisa esto primero.
-- **Historial:** abrir el detalle de un yapeo antiguo puede mostrar "Yapeaste" y registrarlo como gasto nuevo. Bórralo de la hoja si pasa.
-- **Pagos repetidos:** dos pagos con el mismo monto a la misma persona en menos de 3 minutos (`DEDUP_SECONDS`) se registran una sola vez.
-- **Accesibilidad:** con ese permiso, MacroDroid puede leer todo lo que hay en pantalla. Mantén el filtro solo en la app Yape. Si Yape muestra advertencias o se niega a abrir con el servicio activo, desactívalo y usa otra fuente (correo o SMS).
-- **Categoría y Nota:** en Gastos se llenan a mano, o se pueden agregar reglas al script (destinatario → categoría).
+## Alternativa avanzada: Apps Script
+
+[apps-script/Code.gs](apps-script/Code.gs) hace lo mismo con un webhook propio. Separa ingresos y gastos en pestañas, elimina duplicados en el servidor y exige una clave secreta. Requiere publicar el script como aplicación web; las instrucciones están en los comentarios del archivo.

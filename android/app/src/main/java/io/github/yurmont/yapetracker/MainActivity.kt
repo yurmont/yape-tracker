@@ -27,12 +27,11 @@ import java.util.Locale
 import java.util.TimeZone
 import java.util.concurrent.Executors
 
-/** Launcher screen: the stored movements, totals, Excel export and notification access. */
+/** Launcher screen: automatic-registration status, the stored movements, totals and Excel export. */
 class MainActivity : Activity() {
 
     private lateinit var filterGroup: RadioGroup
     private lateinit var totals: TextView
-    private lateinit var notificationCard: View
     private lateinit var list: ListView
     private val adapter = MovementAdapter()
 
@@ -43,7 +42,6 @@ class MainActivity : Activity() {
         setContentView(R.layout.activity_main)
         filterGroup = findViewById(R.id.filter)
         totals = findViewById(R.id.totals)
-        notificationCard = findViewById(R.id.notification_card)
         list = findViewById(R.id.list)
         list.adapter = adapter
         list.emptyView = findViewById(R.id.empty)
@@ -60,11 +58,11 @@ class MainActivity : Activity() {
         findViewById<Button>(R.id.add).setOnClickListener {
             startActivity(Intent(this, ShareActivity::class.java))
         }
-        findViewById<Button>(R.id.grant_notifications).setOnClickListener {
-            startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
-        }
-        findViewById<Button>(R.id.auto_toggle).setOnClickListener {
+        findViewById<Button>(R.id.auto_pay_button).setOnClickListener {
             startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+        }
+        findViewById<Button>(R.id.auto_income_button).setOnClickListener {
+            startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
         }
         list.setOnItemLongClickListener { _, _, position, _ ->
             confirmDelete(adapter.getItem(position))
@@ -74,28 +72,37 @@ class MainActivity : Activity() {
 
     override fun onResume() {
         super.onResume()
-        notificationCard.visibility = if (notificationAccessGranted()) View.GONE else View.VISIBLE
-        refreshAutoCapture()
+        refreshAutomatic()
         refresh()
     }
 
-    private fun refreshAutoCapture() {
-        val on = enabledInSecureList(Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, YapeScreenService::class.java)
-        val log = AutoCaptureLog(this)
-        val lines = mutableListOf(
+    /** "Registro automático": one line per source, with "Activar" only when it is off. */
+    private fun refreshAutomatic() {
+        val canCapture = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R
+        val payOn = canCapture &&
+            enabledInSecureList(Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, YapeScreenService::class.java)
+        findViewById<TextView>(R.id.auto_pay_status).setText(
             when {
-                android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.R -> getString(R.string.auto_needs_android_11)
-                on -> getString(R.string.auto_on)
-                else -> getString(R.string.auto_off)
+                !canCapture -> R.string.auto_pay_old_android
+                payOn -> R.string.auto_pay_on
+                else -> R.string.auto_pay_off
             },
         )
-        if (on || log.events > 0) lines += getString(R.string.auto_stats, log.events, log.captures, log.saved)
-        log.lastMessage?.let { msg ->
-            val ago = android.text.format.DateUtils.getRelativeTimeSpanString(log.lastAt)
-            lines += getString(R.string.auto_last, ago, msg)
+        findViewById<Button>(R.id.auto_pay_button).visibility =
+            if (canCapture && !payOn) View.VISIBLE else View.GONE
+
+        val incomeOn = notificationAccessGranted()
+        findViewById<TextView>(R.id.auto_income_status)
+            .setText(if (incomeOn) R.string.auto_income_on else R.string.auto_income_off)
+        findViewById<Button>(R.id.auto_income_button).visibility = if (incomeOn) View.GONE else View.VISIBLE
+
+        // Warn only about a recent receipt that couldn't be read, so the user can share it instead.
+        val log = AutoCaptureLog(this)
+        val problem = log.problem?.takeIf { payOn && System.currentTimeMillis() - log.problemAt < PROBLEM_SHOWN_MS }
+        findViewById<TextView>(R.id.auto_problem).apply {
+            text = problem?.let { getString(R.string.auto_problem, it) }
+            visibility = if (problem != null) View.VISIBLE else View.GONE
         }
-        findViewById<TextView>(R.id.auto_status).text = lines.joinToString("\n")
-        findViewById<Button>(R.id.auto_toggle).setText(if (on) R.string.auto_settings else R.string.auto_turn_on)
     }
 
     private fun refresh() {
@@ -225,6 +232,7 @@ class MainActivity : Activity() {
 
     private companion object {
         const val REQUEST_EXPORT = 1
+        const val PROBLEM_SHOWN_MS = 24 * 60 * 60 * 1000L
         const val XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         val io = Executors.newSingleThreadExecutor()
     }

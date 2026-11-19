@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- No INTERNET permission: OCR runs on the phone and data stays on the phone. -->
+    <!-- OCR runs on the phone and data stays on the phone, so the app needs no internet. ML Kit adds
+         INTERNET only to upload anonymous usage stats; remove it. Its uploads then fail as ordinary
+         network errors and are retried later, harmlessly.
+         ACCESS_NETWORK_STATE (also from ML Kit) stays: it gives no network access, and on Android 14+
+         JobScheduler throws if ML Kit schedules its network-constrained job without it. -->
+    <uses-permission
+        android:name="android.permission.INTERNET"
+        tools:node="remove" />
 
     <application
         android:allowBackup="true"

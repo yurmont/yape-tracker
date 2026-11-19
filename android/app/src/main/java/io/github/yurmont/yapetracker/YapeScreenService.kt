@@ -42,13 +42,12 @@ class YapeScreenService : AccessibilityService() {
 
     override fun onServiceConnected() {
         log = AutoCaptureLog(this)
+        log.ok() // a fresh start has no pending problem
         recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
-        log.note(getString(R.string.auto_log_connected))
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
         if (event.packageName?.toString() !in Config.YAPE_PACKAGES) return
-        log.countEvent()
         val now = SystemClock.uptimeMillis()
         if (pendingSince == 0L) pendingSince = now
         handler.removeCallbacks(captureRunnable)
@@ -67,7 +66,7 @@ class YapeScreenService : AccessibilityService() {
 
     private fun capture() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-            log.note(getString(R.string.auto_log_needs_android_11))
+            // No takeScreenshot before Android 11; the main screen tells the user to use Compartir.
             return
         }
         if (busy) return
@@ -90,7 +89,6 @@ class YapeScreenService : AccessibilityService() {
             mainExecutor,
             object : TakeScreenshotCallback {
                 override fun onSuccess(result: ScreenshotResult) {
-                    log.countCapture()
                     val bitmap = try {
                         Bitmap.wrapHardwareBuffer(result.hardwareBuffer, result.colorSpace)
                             ?.let { hw -> hw.copy(Bitmap.Config.ARGB_8888, false).also { hw.recycle() } }
@@ -98,36 +96,38 @@ class YapeScreenService : AccessibilityService() {
                         result.hardwareBuffer.close()
                     }
                     if (bitmap == null) {
-                        done(getString(R.string.auto_log_capture_failed, -1))
+                        done()
                         return
                     }
                     recognize(bitmap)
                 }
 
                 override fun onFailure(errorCode: Int) {
-                    done(getString(R.string.auto_log_capture_failed, errorCode))
+                    done() // e.g. too soon after the last one; the next event retries
                 }
             },
         )
     }
 
     private fun recognize(bitmap: Bitmap) {
-        val client = recognizer ?: return done(null)
+        val client = recognizer ?: return done()
         client.process(InputImage.fromBitmap(bitmap, 0))
-            .addOnSuccessListener { text -> done(handleReceipt(text.linesInReadingOrder())) }
-            .addOnFailureListener { done(getString(R.string.auto_log_ocr_failed)) }
-            .addOnCompleteListener { bitmap.recycle() }
+            .addOnSuccessListener { text -> handleReceipt(text.linesInReadingOrder()) }
+            .addOnCompleteListener {
+                bitmap.recycle()
+                done()
+            }
     }
 
-    /** Saves the receipt if it is a complete, new "¡Yapeaste!". Returns what to note in the log. */
-    private fun handleReceipt(lines: List<String>): String? {
+    /** Saves the receipt if it is a complete, new "¡Yapeaste!"; remembers a receipt it could not read. */
+    private fun handleReceipt(lines: List<String>) {
         val r = ReceiptParser.parse(lines)
-        if (!r.isYapeaste) return null // any other Yape screen: nothing to note
+        if (!r.isYapeaste) return // any other Yape screen
         val cents = r.amount?.let(Money::parseCents)
         val op = r.operation
-        if (cents == null || op == null) return getString(R.string.auto_log_incomplete)
+        if (cents == null || op == null) return log.problem(getString(R.string.auto_problem_incomplete))
         val db = MovementDb.get(this)
-        if (db.operationExists(op)) return getString(R.string.auto_log_already, op)
+        if (db.operationExists(op)) return log.ok()
 
         db.insert(
             Movement(
@@ -147,15 +147,13 @@ class YapeScreenService : AccessibilityService() {
                 createdAt = System.currentTimeMillis(),
             ),
         )
-        log.countSaved()
+        log.ok()
         val summary = "S/ ${Money.format(cents)}" + (r.recipient?.let { " · $it" } ?: "")
         Toast.makeText(this, getString(R.string.auto_toast_saved, summary), Toast.LENGTH_LONG).show()
-        return getString(R.string.auto_log_saved, summary, op)
     }
 
-    private fun done(message: String?) {
+    private fun done() {
         busy = false
-        message?.let(log::note)
     }
 
     private companion object {

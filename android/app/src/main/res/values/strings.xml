@@ -39,27 +39,22 @@
     <string name="dialog_delete_title">Borrar movimiento</string>
     <string name="dialog_delete_message">¿Borrar %1$s? No se puede deshacer.</string>
     <string name="dialog_delete_confirm">Borrar</string>
-    <string name="notification_access_needed">Para registrar los yapeos que recibes, permite que Yape Tracker lea las notificaciones. Solo guarda las de Yape con un monto.</string>
-    <string name="notification_access_grant">Permitir</string>
 
-    <!-- Automatic expense capture (accessibility, test) -->
-    <string name="auto_service_label">Yape Tracker: gastos automáticos</string>
-    <string name="auto_service_description">Registra tus gastos de Yape sin Compartir. Solo mira la app Yape: cuando aparece la constancia \"¡Yapeaste!\", toma una captura interna (no se guarda en tu galería), la lee en el celular y guarda el gasto. No ve ninguna otra app y no envía nada a internet.</string>
-    <string name="auto_title">Gastos automáticos (prueba)</string>
-    <string name="auto_off">Apagado. Al activarlo, los gastos se registran solos al ver la constancia \"¡Yapeaste!\", sin Compartir.</string>
-    <string name="auto_on">Activo. Haz un yapeo y espera la constancia unos segundos.</string>
-    <string name="auto_needs_android_11">Necesita Android 11 o superior.</string>
-    <string name="auto_stats">Eventos de Yape: %1$d · Capturas: %2$d · Guardados: %3$d</string>
-    <string name="auto_last">Último (%1$s): %2$s</string>
+    <!-- Registro automático (main screen) -->
+    <string name="auto_title">Registro automático</string>
     <string name="auto_turn_on">Activar</string>
-    <string name="auto_settings">Ajustes</string>
+    <string name="auto_pay_on">✓ Pagos que haces</string>
+    <string name="auto_pay_off">Pagos que haces: apagado</string>
+    <string name="auto_pay_old_android">Pagos que haces: usa Compartir (necesita Android 11)</string>
+    <string name="auto_income_on">✓ Pagos que recibes</string>
+    <string name="auto_income_off">Pagos que recibes: apagado</string>
+    <string name="auto_problem">El último pago no se registró solo: %1$s Usa Compartir para anotarlo.</string>
+
+    <!-- Accessibility service (pagos que haces) -->
+    <string name="auto_service_label">Yape Tracker</string>
+    <string name="auto_service_description">Anota solos los pagos que haces con Yape. Solo mira la app Yape: cuando aparece \"¡Yapeaste!\", toma una foto interna de la pantalla (no se guarda en tu galería), la lee en el celular y anota el pago. No ve ninguna otra app y no usa internet.</string>
     <string name="auto_toast_saved">Yape Tracker: registrado %1$s</string>
-    <string name="auto_log_connected">Servicio activado.</string>
-    <string name="auto_log_needs_android_11">Este celular no permite capturas internas (requiere Android 11).</string>
-    <string name="auto_log_capture_failed">No se pudo tomar la captura (código %1$d).</string>
-    <string name="auto_log_ocr_failed">No se pudo leer la captura.</string>
-    <string name="auto_log_incomplete">Vi \"¡Yapeaste!\" pero faltó el monto o el número de operación.</string>
-    <string name="auto_log_already">Constancia ya registrada (op %1$s).</string>
-    <string name="auto_log_saved">Guardado %1$s (op %2$s).</string>
-    <string name="empty_usage">Aún no hay movimientos.\n\nGastos: en la pantalla \"¡Yapeaste!\" toca Compartir y elige Yape Tracker. Revisa los datos y toca Guardar.\n\nIngresos: se guardan solos cuando llega la notificación de Yape.\n\nMantén presionado un movimiento para borrarlo.</string>
+    <string name="auto_problem_incomplete">no se pudo leer el monto o el número de operación.</string>
+
+    <string name="empty_usage">Aún no hay movimientos.\n\nCuando yapees o te yapeen, aparecerán aquí.\n\nSi el registro automático está apagado, en la pantalla \"¡Yapeaste!\" toca Compartir y elige Yape Tracker.\n\nMantén presionado un movimiento para borrarlo.</string>
 </resources>

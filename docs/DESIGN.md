@@ -19,7 +19,7 @@ Yape sends no notification when you pay (only for received payments and promos),
 screen-content triggers never fired on Yape: Yape doesn't expose its text to accessibility. Sharing the
 receipt is the reliable source for expenses.
 
-### Automatic capture (test feature)
+### Automatic capture
 
 Yape does allow screenshots of the receipt, so `YapeScreenService` (an AccessibilityService limited to Yape's
 package, off by default) uses `takeScreenshot()` (Android 11+) instead of reading text:
@@ -28,8 +28,8 @@ package, off by default) uses `takeScreenshot()` (Android 11+) instead of readin
   is ~1 s).
 - The screenshot is a hardware bitmap that never touches storage; it is OCR'd with `ReceiptParser`.
 - It saves only a "¡Yapeaste!" with amount **and** a new operation number, so it never duplicates the share flow.
-- `AutoCaptureLog` counts events/captures/saves and keeps the last result, shown on the main screen, to tell
-  whether Yape's events reach the service on a given phone.
+- `AutoCaptureLog` remembers a "¡Yapeaste!" it couldn't read; the main screen shows it for 24 h so the
+  user can share that receipt instead. Tested on a Samsung (Android 14+): Yape's events reach the service.
 
 Trade-offs: Android 13+ requires "Allow restricted settings" for sideloaded apps, and Play Protect is stricter
 with accessibility apps.
@@ -68,6 +68,8 @@ The parser must not rely on line order between columns.
 ## App
 
 - Kotlin, minSdk 26, targetSdk 35, no AndroidX. Dependencies: ML Kit Text Recognition (bundled Latin model).
+- No INTERNET permission: the manifest removes the one ML Kit adds for usage stats (ACCESS_NETWORK_STATE stays;
+  Android 14+ JobScheduler requires it for ML Kit's network-constrained job).
 - `ShareActivity`: `ACTION_SEND` + `image/*` → OCR → parse → editable form (amount, recipient, date, operation,
   **Concepto**) → **Guardar**. Opened from the main screen without an image, it is a manual-entry form.
 - **Duplicates:** a repeated operation number shows "Ya registrado" and asks before saving again.

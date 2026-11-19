@@ -3,25 +3,19 @@ package io.github.yurmont.yapetracker
 import android.content.Context
 
 /**
- * What the automatic capture has seen, shown on the main screen. While this feature is being tested
- * it tells us whether Yape lets the service see its screen at all.
+ * Remembers the last time automatic capture failed to register a "¡Yapeaste!", so the main screen
+ * can tell the user to use "Compartir" for that payment. A later successful capture clears it.
  */
 class AutoCaptureLog(context: Context) {
 
     private val prefs = context.applicationContext.getSharedPreferences("auto_capture", Context.MODE_PRIVATE)
 
-    val events: Int get() = prefs.getInt("events", 0)
-    val captures: Int get() = prefs.getInt("captures", 0)
-    val saved: Int get() = prefs.getInt("saved", 0)
-    val lastMessage: String? get() = prefs.getString("last_message", null)
-    val lastAt: Long get() = prefs.getLong("last_at", 0L)
+    /** The last problem, or null when the last receipt seen was registered. */
+    val problem: String? get() = prefs.getString("problem", null)
+    val problemAt: Long get() = prefs.getLong("problem_at", 0L)
 
-    fun countEvent() = prefs.edit().putInt("events", events + 1).apply()
+    fun problem(message: String) =
+        prefs.edit().putString("problem", message).putLong("problem_at", System.currentTimeMillis()).apply()
 
-    fun countCapture() = prefs.edit().putInt("captures", captures + 1).apply()
-
-    fun countSaved() = prefs.edit().putInt("saved", saved + 1).apply()
-
-    fun note(message: String) =
-        prefs.edit().putString("last_message", message).putLong("last_at", System.currentTimeMillis()).apply()
+    fun ok() = prefs.edit().remove("problem").remove("problem_at").apply()
 }

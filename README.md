@@ -1,61 +1,152 @@
 # Yape Tracker
 
-App Android que registra los yapeos que **recibes** y los que **haces**, los guarda en el mismo celular y los exporta a Excel.
+**Yape Tracker** es una app para Android que anota tus yapeos por ti: lo que **pagas** y lo que **te pagan**. Todo queda guardado en tu celular y, cuando quieras, lo pasas a un archivo de **Excel**.
 
-- **Gastos:** en la pantalla **"¡Yapeaste!"** toca **Compartir → Yape Tracker**. La app lee la constancia en el celular (OCR, sin internet) y llena monto, destinatario, fecha y número de operación. Agrega un concepto si quieres y toca **Guardar**.
-- **Ingresos:** se guardan solos cuando llega la notificación de Yape *"… te envió un pago por S/ X"*. Las promociones se ignoran.
-- **Excel:** en la app elige **Todos**, **Gastos** o **Ingresos** y toca **Exportar a Excel**. Se guarda un archivo `.xlsx` (por ejemplo en *Descargas*) con fecha, tipo, monto, importe (+/−), persona, número de operación, concepto y una fila de total.
+- 💸 **Cuando yapeas**, se anota solo al aparecer la pantalla **"¡Yapeaste!"**.
+- 💰 **Cuando te yapean**, se anota solo con la notificación de Yape.
+- 📊 **Exportas a Excel** tus gastos, tus ingresos o todo junto, con el total.
+- 🔒 **Privado**: tus datos nunca salen del celular. La app no usa internet, no pide cuenta ni contraseña.
 
-Los datos se guardan **solo en tu celular**, sin cuentas ni servidores. La app nunca envía tus movimientos a ningún lado.
+> Yape Tracker no es una app oficial de Yape ni del BCP. No puede mover tu dinero: solo lee lo que Yape te muestra.
 
-## Instalar el APK
+---
 
-1. En el celular abre la última versión (si el repositorio es privado, inicia sesión en GitHub antes):
-   `https://github.com/yurmont/yape-tracker/releases/latest`
-2. Descarga **`yape-tracker.apk`** y ábrelo.
-3. Si Android lo pide, permite **Instalar apps desconocidas** para el navegador o el gestor de archivos.
-4. Abre **Yape Tracker** y toca **Permitir** en el aviso de notificaciones. Activa *Yape Tracker* en la lista. Sin este permiso, solo se registran los gastos.
+## Qué necesitas
 
-Las versiones nuevas se instalan encima de la anterior y conservan los datos, porque todas se firman con la misma clave.
+- Un celular **Android 8 o más nuevo** con la app **Yape**.
+- Para que los pagos que **haces** se anoten solos: **Android 11 o más nuevo**. En celulares más antiguos se anotan con el botón **Compartir** (ver [Cómo se usa](#cómo-se-usa)).
 
-## Usar "Compartir → Yape Tracker"
+---
 
-1. Yapea como siempre. En la constancia **"¡Yapeaste!"** toca **Compartir**.
-2. En la lista de apps elige **Yape Tracker**. La primera vez puede estar en *Más*.
-3. Revisa los datos. Si la operación ya estaba guardada, verás **"Ya registrado"**, y la app te pide confirmar antes de guardarla otra vez.
-4. Toca **Guardar**.
+## 1. Instalar
 
-Si la lectura falla, toca **Ver texto leído** para ver lo que reconoció el OCR. Corrige los campos a mano. También puedes registrar un gasto sin constancia con **Agregar gasto**. Mantén presionado un movimiento para borrarlo.
+1. Desde el celular, abre este enlace y descarga el archivo:
+   **https://github.com/yurmont/yape-tracker/releases/latest/download/yape-tracker.apk**
+2. Abre el archivo descargado (`yape-tracker.apk`) y toca **Instalar**.
+3. Si el celular dice **"Instalar apps desconocidas"**, toca **Configuración**, activa **Permitir de esta fuente** y vuelve atrás.
+4. Si aparece **Play Protect** con un aviso de *"app bloqueada"* o *"puede acceder a datos privados"*:
+   toca **Más detalles** y luego **Instalar de todos modos**.
 
-## Gastos automáticos (prueba)
+   ¿Por qué sale? La app no viene de Play Store y pide leer notificaciones. Es un aviso general, no significa que tenga virus.
 
-Opcional y apagado por defecto. Registra los gastos **sin Compartir**: cuando aparece la constancia **"¡Yapeaste!"**, la app toma una captura interna, que no se guarda en tu galería. Luego la lee en el celular y guarda el gasto si el número de operación es nuevo. Verás el aviso *"Yape Tracker: registrado S/ …"*.
+---
 
-1. En Yape Tracker, en **Gastos automáticos (prueba)**, toca **Activar**.
-2. En Accesibilidad, abre **Apps instaladas** (o *Servicios descargados*) → **Yape Tracker: gastos automáticos** y actívalo.
-   - En Android 13 o superior, si sale *"Ajuste restringido"*: **Ajustes → Apps → Yape Tracker → ⋮ → Permitir ajustes restringidos**. Luego actívalo otra vez.
-3. Haz un yapeo y espera la constancia unos segundos.
+## 2. Activar los permisos (una sola vez)
 
-Necesita Android 11 o superior. El servicio solo recibe la pantalla de **Yape**, no la de otras apps, y no envía nada a internet. Si algo falla, la sección muestra cuántos eventos y capturas vio y el último resultado. El Compartir sigue funcionando igual.
+Abre **Yape Tracker**. Arriba verás **Registro automático** con dos líneas:
 
-## Respaldo
+```
+Registro automático
+Pagos que haces: apagado        ACTIVAR
+Pagos que recibes: apagado      ACTIVAR
+```
 
-Android incluye la base de datos de la app en la copia de seguridad del teléfono (Google One / Drive), si la tienes activada. Si desinstalas la app sin respaldo, los datos se pierden. Exporta a Excel de vez en cuando.
+Toca cada **Activar** y sigue los pasos de abajo. Cuando las dos líneas muestren **✓**, ya está todo listo.
 
-## Compilar (desarrolladores)
+### a) Pagos que recibes
 
-El código está en [`android/`](android/). Con JDK 17 y el Android SDK (plataforma 35):
+1. Junto a *Pagos que recibes*, toca **Activar**.
+2. En la lista, activa **Yape Tracker** y confirma.
+
+### b) Pagos que haces
+
+1. Junto a *Pagos que haces*, toca **Activar**.
+2. Entra a **Aplicaciones instaladas** (o *Servicios descargados*) → **Yape Tracker** y activa el interruptor de arriba. Deja apagado el *"Atajo"*.
+3. Si el interruptor está **gris** o sale **"Ajuste restringido"**, Android lo bloquea porque la app no viene de Play Store. Para desbloquearlo:
+   1. Toca **Aceptar** en el aviso.
+   2. Ve a **Ajustes → Aplicaciones → Yape Tracker**.
+   3. Toca **⋮** (tres puntos, arriba a la derecha) → **Permitir ajustes restringidos** y confirma con tu PIN o huella.
+   4. Vuelve al paso 2 y activa el interruptor.
+4. Android mostrará un aviso como *"¿Permitir control total?"*. Es el texto que sale para cualquier app de este tipo. Toca **Permitir**.
+
+¿Qué ve la app con este permiso? **Solo la app Yape.** Cuando aparece "¡Yapeaste!", toma una foto interna de la pantalla, que **no se guarda en tu galería**. La lee en el celular para sacar el monto, la persona y el número de operación, y la descarta.
+
+---
+
+## Cómo se usa
+
+### Cuando yapeas (pagas)
+
+**Automático:** yapea como siempre y quédate en la pantalla **"¡Yapeaste!"** unos **3 segundos**. Aparece el mensaje *"Yape Tracker: registrado S/ …"* y listo.
+
+**Con Compartir** (si el automático está apagado o no se anotó):
+1. En la pantalla **"¡Yapeaste!"** toca **Compartir**.
+2. Elige **Yape Tracker**. La primera vez puede estar en *Más*.
+3. Revisa los datos, escribe un **Concepto** si quieres (por ejemplo *"almuerzo"*) y toca **Guardar**.
+
+Si un yapeo ya estaba anotado, la app lo detecta por el **número de operación** y no lo repite.
+
+### Cuando te yapean (cobras)
+
+No haces nada. Cuando llega la notificación de Yape *"… te envió un pago por S/ …"*, se anota sola con el nombre y el monto. Las promociones de Yape se ignoran.
+
+### Anotar algo a mano
+
+Toca **Agregar gasto**, escribe el monto y lo demás, y toca **Guardar**.
+
+### Borrar un movimiento
+
+**Mantén presionado** el movimiento en la lista y confirma **Borrar**.
+
+---
+
+## Exportar a Excel
+
+1. Arriba, elige qué quieres exportar: **Todos**, **Gastos** o **Ingresos**.
+2. Toca **Exportar a Excel**.
+3. Elige dónde guardarlo (por ejemplo **Descargas**) y toca **Guardar**.
+
+El archivo `.xlsx` se abre en Excel, Google Sheets o WPS. Trae una fila por movimiento y una fila de **Total** al final:
+
+| Columna | Qué es |
+|---|---|
+| Registrado | Fecha y hora en que se anotó |
+| Tipo | Gasto o Ingreso |
+| Monto | El monto del yapeo |
+| Importe | Igual que Monto, pero **negativo para gastos**: sumándolo obtienes tu saldo |
+| Persona | A quién pagaste o quién te pagó |
+| Fecha en Yape | La fecha que muestra la constancia |
+| Nro. de operación | El número de la constancia |
+| Concepto | Lo que escribiste |
+| Texto | El texto original de la constancia o la notificación |
+
+---
+
+## Actualizar la app
+
+Descarga e instala el mismo enlace del paso 1. La versión nueva se instala **encima** de la anterior y **conserva tus movimientos**.
+
+---
+
+## Tus datos
+
+- Se guardan **solo en tu celular**. Nadie más los ve.
+- La app **no usa internet**. Tampoco tiene cuentas, anuncios ni rastreo.
+- Si **desinstalas** la app, los movimientos se borran. Exporta a Excel de vez en cuando como respaldo.
+- Si tienes activada la copia de seguridad de Google en tu celular, Android puede incluir los datos de la app.
+
+---
+
+## Problemas frecuentes
+
+| Problema | Solución |
+|---|---|
+| Play Protect bloquea la instalación | **Más detalles → Instalar de todos modos**. Si no aparece: Play Store → tu foto → Play Protect → ⚙️ → desactiva *Analizar apps*, instala y **vuelve a activarlo**. |
+| El interruptor de Yape Tracker en Accesibilidad está gris | Sigue el paso **2b-3**: *Permitir ajustes restringidos*. |
+| Un pago que hiciste no se anotó solo | Quédate unos segundos en "¡Yapeaste!". Si la app no pudo leer la constancia, lo avisa en **Registro automático**. Anótalo con **Compartir**. |
+| Los pagos que recibes no aparecen | Revisa que *Pagos que recibes* tenga **✓** (paso 2a). En Samsung, Xiaomi u Oppo: Ajustes → Apps → Yape Tracker → Batería → **Sin restricciones**. |
+| Una línea de Registro automático dice "apagado" | Toca **Activar** junto a ella. A veces Android la apaga después de actualizar la app. |
+| Un dato salió mal leído | Con Compartir, corrígelo antes de Guardar (toca **Ver texto leído** para ver lo que leyó). Si ya se guardó, bórralo y anótalo de nuevo. |
+| "No se puede instalar" al actualizar | Tienes una versión firmada de otra forma. Exporta a Excel, desinstala y vuelve a instalar. |
+
+---
+
+## Para desarrolladores
+
+El código está en [`android/`](android/) (Kotlin, sin AndroidX). Los detalles de diseño están en [docs/DESIGN.md](docs/DESIGN.md).
 
 ```bash
 cd android && ./gradlew testDebugUnitTest assembleDebug
 ```
 
-Sin JDK ni SDK instalados, [`android/docker-build.sh`](android/docker-build.sh) hace lo mismo dentro de Docker. GitHub Actions ([`.github/workflows/android.yml`](.github/workflows/android.yml)) corre los tests en cada push. En `main` publica el APK firmado como *Release*, siempre que el repositorio tenga estos secretos:
-
-| Secreto | Contenido |
-|---|---|
-| `ANDROID_KEYSTORE_BASE64` | el keystore `.jks` en base64 |
-| `ANDROID_KEYSTORE_PASSWORD` | contraseña del keystore |
-| `ANDROID_KEY_ALIAS` | alias de la clave |
-| `ANDROID_KEY_PASSWORD` | contraseña de la clave |
-
+Sin JDK ni Android SDK, [`android/docker-build.sh`](android/docker-build.sh) compila dentro de Docker. GitHub Actions ([`.github/workflows/android.yml`](.github/workflows/android.yml)) corre las pruebas en cada push. En `main` publica el APK firmado como *Release* si el repositorio tiene los secretos `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` y `ANDROID_KEY_PASSWORD`.

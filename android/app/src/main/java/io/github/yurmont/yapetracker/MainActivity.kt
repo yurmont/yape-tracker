@@ -76,7 +76,9 @@ class MainActivity : Activity() {
     }
 
     private fun refresh() {
-        val items = MovementDb.get(this).list(filter)
+        val db = MovementDb.get(this)
+        db.fillMissingIncomePersons()
+        val items = db.list(filter)
         adapter.items = items
         val spent = items.filter { it.type == MovementType.GASTO }.sumOf { it.amountCents }
         val received = items.filter { it.type == MovementType.INGRESO }.sumOf { it.amountCents }
@@ -181,8 +183,10 @@ class MainActivity : Activity() {
             val view = convertView ?: layoutInflater.inflate(R.layout.item_movement, parent, false)
             val m = items[position]
             view.findViewById<TextView>(R.id.item_title).text = m.person ?: m.type.label
+            // Without a name, show what the notification said so the entry is still recognisable.
+            val detail = m.concepto ?: m.rawText.takeIf { m.person == null }
             view.findViewById<TextView>(R.id.item_subtitle).text =
-                listOfNotNull(m.yapeDate ?: timeFormat.format(Date(m.createdAt)), m.concepto).joinToString(" · ")
+                listOfNotNull(m.yapeDate ?: timeFormat.format(Date(m.createdAt)), detail).joinToString(" · ")
             view.findViewById<TextView>(R.id.item_amount).apply {
                 val expense = m.type == MovementType.GASTO
                 text = (if (expense) "-S/ " else "+S/ ") + Money.format(m.amountCents)

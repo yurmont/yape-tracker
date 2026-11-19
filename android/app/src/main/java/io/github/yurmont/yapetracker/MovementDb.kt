@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import io.github.yurmont.yapetracker.core.Movement
 import io.github.yurmont.yapetracker.core.MovementType
+import io.github.yurmont.yapetracker.parser.IncomeNotification
 
 /** Every expense and income, stored only on this phone. */
 class MovementDb private constructor(context: Context) :
@@ -57,6 +58,22 @@ class MovementDb private constructor(context: Context) :
         val (where, args) = if (type == null) null to null else "type = ?" to arrayOf(type.name)
         return readableDatabase.query("movements", null, where, args, null, null, "created_at DESC, _id DESC")
             .use { c -> generateSequence { if (c.moveToNext()) c.toMovement() else null }.toList() }
+    }
+
+    /**
+     * Fills in the payer of incomes saved without one, using the stored notification text.
+     * Lets parser fixes apply to incomes recorded by an older version of the app.
+     */
+    fun fillMissingIncomePersons() {
+        val db = writableDatabase
+        val missing = db.rawQuery(
+            "SELECT _id, raw_text FROM movements WHERE type = ? AND person IS NULL",
+            arrayOf(MovementType.INGRESO.name),
+        ).use { c -> generateSequence { if (c.moveToNext()) c.getLong(0) to c.getString(1) else null }.toList() }
+        for ((id, text) in missing) {
+            val person = IncomeNotification.personFrom(text) ?: continue
+            db.update("movements", ContentValues().apply { put("person", person) }, "_id = ?", arrayOf(id.toString()))
+        }
     }
 
     fun operationExists(operation: String): Boolean = readableDatabase.rawQuery(

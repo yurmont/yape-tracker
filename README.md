@@ -82,7 +82,7 @@ Instala **MacroDroid** (gratis, hasta 5 macros; aquí se usan 2). En las dos mac
 - Seguir redireccionamientos: marcado
 - Los dos campos van en la pestaña **Parámetros de Consulta**
 
-El Magic Text de MacroDroid usa **llaves**: `{notification}`, `{lv=variable}`. Insértalo con el botón **…** junto al campo.
+El Magic Text de MacroDroid usa **llaves**: `{notification}`, `{v=variable_global}`. Insértalo con el botón **…** junto al campo.
 
 ### Macro 1: Ingresos (notificaciones)
 
@@ -112,7 +112,7 @@ Crea antes una variable global de texto llamada `yape_pantalla` (MacroDroid → 
 | Clave | Valor |
 |-------|-------|
 | `entry.111111111` | `pantalla` |
-| `entry.222222222` | `{lv=yape_pantalla}` (Magic text → variable) |
+| `entry.222222222` | `{v=yape_pantalla}` (Magic text → variable) |
 
 En las opciones de la macro, evita que se repita en menos de **10 s**.
 

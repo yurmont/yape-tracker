@@ -76,10 +76,13 @@ En la hoja vinculada, crea una pestaña nueva llamada `Movimientos`. Escribe est
 
 ## 3. MacroDroid (en el celular, ~10 min)
 
-Instala **MacroDroid** (gratis, hasta 5 macros; aquí se usan 2). En las dos macros, la acción **Petición HTTP** es igual:
-- Método: **POST**
-- URL: tu **URL de envío** (`…/formResponse`)
-- Cuerpo: **Form data**
+Instala **MacroDroid** (gratis, hasta 5 macros; aquí se usan 2). En las dos macros, la acción es **Solicitud HTTP**: Acciones → categoría **Interacciones web**, o búscala con la lupa escribiendo `HTTP`. **No** uses "Petición al servidor HTTP", que es un disparador para recibir peticiones.
+- Método de Solicitud: **GET**
+- URL: tu **URL de envío** (`…/formResponse`), sin `?` al final
+- Seguir redireccionamientos: marcado
+- Los dos campos van en la pestaña **Parámetros de Consulta**
+
+El Magic Text de MacroDroid usa **llaves**: `{notification}`, `{lv=variable}`. Insértalo con el botón **…** junto al campo.
 
 ### Macro 1: Ingresos (notificaciones)
 

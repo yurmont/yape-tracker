@@ -13,7 +13,6 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import com.google.mlkit.vision.common.InputImage
-import com.google.mlkit.vision.text.Text
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import io.github.yurmont.yapetracker.core.Money
@@ -102,7 +101,7 @@ class ShareActivity : Activity() {
         TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
             .process(image)
             .addOnSuccessListener { result ->
-                val lines = linesInReadingOrder(result)
+                val lines = result.linesInReadingOrder()
                 ocrText.text = lines.joinToString("\n")
                 fill(ReceiptParser.parse(lines))
             }
@@ -111,13 +110,6 @@ class ShareActivity : Activity() {
                 showWarning(getString(R.string.warning_unreadable))
             }
     }
-
-    /** OCR lines sorted top to bottom, then left to right. The parser copes with any order anyway. */
-    private fun linesInReadingOrder(result: Text): List<String> =
-        result.textBlocks
-            .flatMap { it.lines }
-            .sortedWith(compareBy({ it.boundingBox?.top ?: 0 }, { it.boundingBox?.left ?: 0 }))
-            .map { it.text }
 
     private fun fill(r: Receipt) {
         amount.setText(r.amount.orEmpty())

@@ -63,6 +63,9 @@ class MainActivity : Activity() {
         findViewById<Button>(R.id.grant_notifications).setOnClickListener {
             startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
         }
+        findViewById<Button>(R.id.auto_toggle).setOnClickListener {
+            startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+        }
         list.setOnItemLongClickListener { _, _, position, _ ->
             confirmDelete(adapter.getItem(position))
             true
@@ -72,7 +75,27 @@ class MainActivity : Activity() {
     override fun onResume() {
         super.onResume()
         notificationCard.visibility = if (notificationAccessGranted()) View.GONE else View.VISIBLE
+        refreshAutoCapture()
         refresh()
+    }
+
+    private fun refreshAutoCapture() {
+        val on = enabledInSecureList(Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, YapeScreenService::class.java)
+        val log = AutoCaptureLog(this)
+        val lines = mutableListOf(
+            when {
+                android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.R -> getString(R.string.auto_needs_android_11)
+                on -> getString(R.string.auto_on)
+                else -> getString(R.string.auto_off)
+            },
+        )
+        if (on || log.events > 0) lines += getString(R.string.auto_stats, log.events, log.captures, log.saved)
+        log.lastMessage?.let { msg ->
+            val ago = android.text.format.DateUtils.getRelativeTimeSpanString(log.lastAt)
+            lines += getString(R.string.auto_last, ago, msg)
+        }
+        findViewById<TextView>(R.id.auto_status).text = lines.joinToString("\n")
+        findViewById<Button>(R.id.auto_toggle).setText(if (on) R.string.auto_settings else R.string.auto_turn_on)
     }
 
     private fun refresh() {
@@ -91,9 +114,13 @@ class MainActivity : Activity() {
         }
     }
 
-    private fun notificationAccessGranted(): Boolean {
-        val enabled = Settings.Secure.getString(contentResolver, "enabled_notification_listeners") ?: return false
-        val me = ComponentName(this, YapeNotificationListener::class.java)
+    private fun notificationAccessGranted(): Boolean =
+        enabledInSecureList("enabled_notification_listeners", YapeNotificationListener::class.java)
+
+    /** Whether one of this app's components is in a ":"-separated list in Settings.Secure. */
+    private fun enabledInSecureList(key: String, component: Class<*>): Boolean {
+        val enabled = Settings.Secure.getString(contentResolver, key) ?: return false
+        val me = ComponentName(this, component)
         return enabled.split(':').any { ComponentName.unflattenFromString(it) == me }
     }
 

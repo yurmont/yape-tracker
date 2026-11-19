@@ -44,5 +44,20 @@
             </intent-filter>
         </service>
 
+        <!-- Test feature: registers expenses from Yape's receipt screen without "Compartir". Off until
+             the user turns it on in Accessibility settings; limited to Yape's package. -->
+        <service
+            android:name=".YapeScreenService"
+            android:exported="true"
+            android:label="@string/auto_service_label"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/yape_screen_service" />
+        </service>
+
     </application>
 </manifest>

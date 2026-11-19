@@ -27,6 +27,17 @@ Las versiones nuevas se instalan encima de la anterior y conservan los datos, po
 
 Si la lectura falla, toca **Ver texto leído** para ver lo que reconoció el OCR. Corrige los campos a mano. También puedes registrar un gasto sin constancia con **Agregar gasto**. Mantén presionado un movimiento para borrarlo.
 
+## Gastos automáticos (prueba)
+
+Opcional y apagado por defecto. Registra los gastos **sin Compartir**: cuando aparece la constancia **"¡Yapeaste!"**, la app toma una captura interna, que no se guarda en tu galería. Luego la lee en el celular y guarda el gasto si el número de operación es nuevo. Verás el aviso *"Yape Tracker: registrado S/ …"*.
+
+1. En Yape Tracker, en **Gastos automáticos (prueba)**, toca **Activar**.
+2. En Accesibilidad, abre **Apps instaladas** (o *Servicios descargados*) → **Yape Tracker: gastos automáticos** y actívalo.
+   - En Android 13 o superior, si sale *"Ajuste restringido"*: **Ajustes → Apps → Yape Tracker → ⋮ → Permitir ajustes restringidos**. Luego actívalo otra vez.
+3. Haz un yapeo y espera la constancia unos segundos.
+
+Necesita Android 11 o superior. El servicio solo recibe la pantalla de **Yape**, no la de otras apps, y no envía nada a internet. Si algo falla, la sección muestra cuántos eventos y capturas vio y el último resultado. El Compartir sigue funcionando igual.
+
 ## Respaldo
 
 Android incluye la base de datos de la app en la copia de seguridad del teléfono (Google One / Drive), si la tienes activada. Si desinstalas la app sin respaldo, los datos se pierden. Exporta a Excel de vez en cuando.

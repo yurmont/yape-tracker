@@ -15,9 +15,24 @@ Record Yape payments on the same Android phone, with no servers or accounts:
 
 ## Why the share-image flow
 
-Yape sends no notification when you pay (only for received payments and promos), and reading Yape's screen
-live through accessibility or screenshot OCR never fires. Sharing the receipt is the one reliable source for
-expenses, so do **not** build an AccessibilityService.
+Yape sends no notification when you pay (only for received payments and promos), and MacroDroid's
+screen-content triggers never fired on Yape: Yape doesn't expose its text to accessibility. Sharing the
+receipt is the reliable source for expenses.
+
+### Automatic capture (test feature)
+
+Yape does allow screenshots of the receipt, so `YapeScreenService` (an AccessibilityService limited to Yape's
+package, off by default) uses `takeScreenshot()` (Android 11+) instead of reading text:
+
+- Events from Yape are debounced (700 ms to settle, at most 2.5 s, ≥1.2 s between captures, the system limit
+  is ~1 s).
+- The screenshot is a hardware bitmap that never touches storage; it is OCR'd with `ReceiptParser`.
+- It saves only a "¡Yapeaste!" with amount **and** a new operation number, so it never duplicates the share flow.
+- `AutoCaptureLog` counts events/captures/saves and keeps the last result, shown on the main screen, to tell
+  whether Yape's events reach the service on a given phone.
+
+Trade-offs: Android 13+ requires "Allow restricted settings" for sideloaded apps, and Play Protect is stricter
+with accessibility apps.
 
 ## Receipt image content (from a real screenshot)
 

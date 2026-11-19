@@ -36,9 +36,9 @@ The share-image flow is the design.
 A Google Form linked to a Google Sheet (`Respuestas de formulario 1`). Submitting is a plain HTTP request:
 
 ```
-GET or POST https://docs.google.com/forms/d/e/1FAIpQLSc_sySbv4Ch69HeKVACBk3yWWCJZdMalhekJm-K-O6P0euXqQ/formResponse
-  entry.561707462 = origen   (e.g. "compartir", "notificacion")
-  entry.352548649 = texto
+GET or POST https://docs.google.com/forms/d/e/<FORM_ID>/formResponse
+  entry.<ORIGEN_ID> = origen   (e.g. "compartir", "notificacion")
+  entry.<TEXTO_ID>  = texto
 ```
 
 Verified: a GET with URL-encoded query params returns "Se ha registrado tu respuesta" and adds a row.

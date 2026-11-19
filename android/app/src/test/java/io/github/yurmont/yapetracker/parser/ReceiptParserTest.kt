@@ -8,7 +8,7 @@ import org.junit.Test
 
 class ReceiptParserTest {
 
-    /** The receipt from docs/APK-HANDOFF.md, read row by row. */
+    /** The receipt from docs/DESIGN.md, read row by row. */
     private val rowOrder = """
         yape
         JOSÉ QUIÑONES

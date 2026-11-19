@@ -1,8 +1,7 @@
 package io.github.yurmont.yapetracker.parser
 
 /**
- * Builds the `texto` sent to the Google Form. The format keeps the Sheet formulas in
- * `formulas.txt` working (Tipo / Monto / Persona):
+ * Builds the one-line summary stored with each expense (the "Texto" column in the Excel export):
  *
  *     Yapeaste S/ 0.40 a Ronald Yur* | 19 nov. 2026 01:31 p. m. | op 19087981 | almuerzo
  */
@@ -27,6 +26,6 @@ object EntryFormatter {
         return (listOf(head) + rest).filter { !it.isNullOrEmpty() }.joinToString(" | ")
     }
 
-    /** "|" separates fields in the sheet, so it can't appear inside one. */
+    /** "|" separates fields in the summary, so it can't appear inside one. */
     private fun clean(s: String): String = s.replace('|', '/').replace(Regex("""\s+"""), " ").trim()
 }

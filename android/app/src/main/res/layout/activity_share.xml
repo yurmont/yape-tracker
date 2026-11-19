@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/share_title"
+            android:textAppearance="@android:style/TextAppearance.Material.Headline" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ProgressBar
+                android:id="@+id/progress"
+                style="@android:style/Widget.Material.ProgressBar.Small"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:id="@+id/status"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/reading" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/warning"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@color/warning_bg"
+            android:padding="12dp"
+            android:textColor="@color/warning_fg"
+            android:visibility="gone" />
+
+        <TextView
+            style="@style/FieldLabel"
+            android:labelFor="@id/amount"
+            android:text="@string/label_amount" />
+
+        <EditText
+            android:id="@+id/amount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:importantForAutofill="no"
+            android:inputType="numberDecimal"
+            android:textSize="24sp" />
+
+        <TextView
+            style="@style/FieldLabel"
+            android:labelFor="@id/recipient"
+            android:text="@string/label_recipient" />
+
+        <EditText
+            android:id="@+id/recipient"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:importantForAutofill="no"
+            android:inputType="textPersonName|textCapWords" />
+
+        <TextView
+            style="@style/FieldLabel"
+            android:labelFor="@id/date_time"
+            android:text="@string/label_date_time" />
+
+        <EditText
+            android:id="@+id/date_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:importantForAutofill="no"
+            android:inputType="text" />
+
+        <TextView
+            style="@style/FieldLabel"
+            android:labelFor="@id/operation"
+            android:text="@string/label_operation" />
+
+        <EditText
+            android:id="@+id/operation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:importantForAutofill="no"
+            android:inputType="number" />
+
+        <TextView
+            style="@style/FieldLabel"
+            android:labelFor="@id/concepto"
+            android:text="@string/label_concepto" />
+
+        <EditText
+            android:id="@+id/concepto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/hint_concepto"
+            android:importantForAutofill="no"
+            android:inputType="textCapSentences" />
+
+        <Button
+            android:id="@+id/save"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:enabled="false"
+            android:text="@string/save" />
+
+        <TextView
+            android:id="@+id/ocr_toggle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:padding="8dp"
+            android:text="@string/show_ocr"
+            android:textColor="?android:attr/colorAccent" />
+
+        <TextView
+            android:id="@+id/ocr_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="monospace"
+            android:textIsSelectable="true"
+            android:textSize="12sp"
+            android:visibility="gone" />
+    </LinearLayout>
+</ScrollView>

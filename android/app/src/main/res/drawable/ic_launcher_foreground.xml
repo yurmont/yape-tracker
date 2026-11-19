@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A receipt with a check mark, centred in the 108dp adaptive-icon safe zone. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Receipt outline with a zig-zag bottom edge. -->
+    <path
+        android:fillColor="@color/icon_fg"
+        android:pathData="M38,32h32v42l-4,-3l-4,3l-4,-3l-4,3l-4,-3l-4,3l-4,-3l-4,3z" />
+    <!-- Check mark cut-out drawn in the background colour. -->
+    <path
+        android:fillColor="@color/icon_bg"
+        android:pathData="M45.5,52.5l3,-3l4.5,4.5l9.5,-9.5l3,3l-12.5,12.5z" />
+</vector>

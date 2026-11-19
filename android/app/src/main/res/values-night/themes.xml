@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="warning_bg">#3D2E10</color>
+    <color name="warning_fg">#FFD892</color>
+    <color name="expense">#F2B8B5</color>
+    <color name="income">#8FD19E</color>
+
+    <style name="Theme.YapeTracker" parent="android:Theme.Material">
+        <item name="android:colorPrimary">@color/brand</item>
+        <item name="android:colorPrimaryDark">@color/brand</item>
+        <item name="android:colorAccent">@color/brand_light</item>
+    </style>
+</resources>

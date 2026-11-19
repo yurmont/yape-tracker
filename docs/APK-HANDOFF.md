@@ -1,5 +1,9 @@
 # Handoff: build the yape-tracker Android app (APK)
 
+> **Update (2026-11-19):** the app in `android/` stores expenses and incomes **locally on the phone** (SQLite)
+> and exports them to Excel (.xlsx), instead of sending them to the Google Form below. It has no INTERNET
+> permission. The Google Form / Sheet setup stays documented in the README as the non-app alternative.
+
 Instructions for continuing this project with Claude Code on a PC that has Android tooling
 (Android Studio / Android SDK + JDK 17+). Paste the prompt at the bottom into Claude Code,
 opened in a clone of this repo.

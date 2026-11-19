@@ -1,0 +1,78 @@
+name: Android
+
+on:
+  push:
+    branches: [main]
+    paths: ["android/**", ".github/workflows/android.yml"]
+  pull_request:
+    paths: ["android/**", ".github/workflows/android.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write # to create the GitHub Release with the APK
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      # Also validates gradle-wrapper.jar against Gradle's published checksums.
+      - uses: gradle/actions/setup-gradle@v4
+
+      # A commit from Windows may lose the executable bit.
+      - name: Unit tests
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon testDebugUnitTest
+
+      - name: Load the fixed signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::notice::ANDROID_KEYSTORE_BASE64 is not set: building a debug APK and skipping the release."
+            exit 0
+          fi
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
+          echo "SIGNING_KEYSTORE=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
+
+      - name: Build APK
+        env:
+          VERSION_CODE: ${{ github.run_number }}
+          SIGNING_STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -n "${SIGNING_KEYSTORE:-}" ]; then
+            ./gradlew --no-daemon assembleRelease
+            cp app/build/outputs/apk/release/app-release.apk yape-tracker.apk
+          else
+            ./gradlew --no-daemon assembleDebug
+            cp app/build/outputs/apk/debug/app-debug.apk yape-tracker.apk
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: yape-tracker-apk
+          path: android/yape-tracker.apk
+
+      # Only signed builds from main are published, so every release installs over the previous one.
+      - name: Publish GitHub Release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && env.SIGNING_KEYSTORE != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v1.0.${{ github.run_number }}" yape-tracker.apk \
+            --target "${{ github.sha }}" \
+            --title "Yape Tracker 1.0.${{ github.run_number }}" \
+            --notes "APK built from ${{ github.sha }}." \
+            --latest

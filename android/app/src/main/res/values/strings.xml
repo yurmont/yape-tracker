@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Yape Tracker</string>
+
+    <!-- ShareActivity -->
+    <string name="share_title">Registrar gasto</string>
+    <string name="reading">Leyendo la constancia…</string>
+    <string name="check_and_save">Revisa los datos y toca Guardar.</string>
+    <string name="label_amount">Monto (S/)</string>
+    <string name="label_recipient">Destinatario</string>
+    <string name="label_date_time">Fecha y hora</string>
+    <string name="label_operation">Nro. de operación</string>
+    <string name="label_concepto">Concepto (opcional)</string>
+    <string name="hint_concepto">Ej.: almuerzo</string>
+    <string name="save">Guardar</string>
+    <string name="show_ocr">Ver texto leído</string>
+    <string name="warning_not_yapeaste">No parece una constancia de \"¡Yapeaste!\". Revisa los datos o escríbelos a mano.</string>
+    <string name="warning_no_image">No llegó ninguna imagen. Puedes escribir los datos a mano.</string>
+    <string name="warning_unreadable">No se pudo leer la imagen. Puedes escribir los datos a mano.</string>
+    <string name="warning_already_sent">Ya registrado: la operación %1$s ya está guardada.</string>
+    <string name="error_amount">Escribe el monto, por ejemplo 12.50</string>
+    <string name="dialog_duplicate_title">Ya registrado</string>
+    <string name="dialog_duplicate_message">La operación %1$s ya está guardada. ¿Guardarla otra vez?</string>
+    <string name="dialog_duplicate_send">Guardar otra vez</string>
+    <string name="toast_saved">Registrado</string>
+
+    <!-- MainActivity -->
+    <string name="filter_all">Todos</string>
+    <string name="filter_gastos">Gastos</string>
+    <string name="filter_ingresos">Ingresos</string>
+    <string name="totals_all">Ingresos S/ %1$s · Gastos S/ %2$s\nSaldo S/ %3$s</string>
+    <string name="totals_gastos">Gastos: S/ %1$s (%2$d)</string>
+    <string name="totals_ingresos">Ingresos: S/ %1$s (%2$d)</string>
+    <string name="export">Exportar a Excel</string>
+    <string name="add_expense">Agregar gasto</string>
+    <string name="export_empty">No hay movimientos para exportar.</string>
+    <string name="export_done">Archivo de Excel guardado.</string>
+    <string name="export_failed">No se pudo guardar el archivo.</string>
+    <string name="dialog_delete_title">Borrar movimiento</string>
+    <string name="dialog_delete_message">¿Borrar %1$s? No se puede deshacer.</string>
+    <string name="dialog_delete_confirm">Borrar</string>
+    <string name="notification_access_needed">Para registrar los yapeos que recibes, permite que Yape Tracker lea las notificaciones. Solo guarda las de Yape con un monto.</string>
+    <string name="notification_access_grant">Permitir</string>
+    <string name="empty_usage">Aún no hay movimientos.\n\nGastos: en la pantalla \"¡Yapeaste!\" toca Compartir y elige Yape Tracker. Revisa los datos y toca Guardar.\n\nIngresos: se guardan solos cuando llega la notificación de Yape.\n\nMantén presionado un movimiento para borrarlo.</string>
+</resources>

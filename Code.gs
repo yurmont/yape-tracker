@@ -1,5 +1,5 @@
 /**
- * yurmont-yape: Yape -> Google Sheet webhook.
+ * yape-tracker: Yape -> Google Sheet webhook.
  *
  * Two sources post here from the Android phone:
  *   - source=notificacion  (MacroDroid, Notification trigger): Yape push notifications, mainly payments you RECEIVE.

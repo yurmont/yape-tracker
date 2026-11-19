@@ -1,4 +1,4 @@
-# yurmont-yape
+# yape-tracker
 
 Registra automáticamente en una Google Sheet los yapeos que **recibes** y los que **haces**, desde un celular Android. Solo usa apps gratuitas: **MacroDroid** (versión gratis, hasta 5 macros; aquí se usan 2) y Google Sheets.
 

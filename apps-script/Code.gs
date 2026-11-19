@@ -11,7 +11,7 @@
  *   1. In a Google Sheet: Extensions -> Apps Script, paste this file, change SECRET, save.
  *   2. Deploy -> New deployment -> Web app (Execute as: Me, Access: Anyone). Copy the /exec URL.
  *   3. In both MacroDroid macros, POST form data to that URL with fields:
- *        token=<SECRET>, source=notificacion|pantalla, title=[notification_title], text=<notification or screen text>
+ *        token=<SECRET>, source=notificacion|pantalla, title={notification_title}, text=<notification or screen text>
  *   After editing: Deploy -> Manage deployments -> Edit -> New version (or the URL keeps the old code).
  */
 

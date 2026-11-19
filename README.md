@@ -85,12 +85,12 @@ Instala **MacroDroid** (gratis, hasta 5 macros; aquí se usan 2). En las dos mac
 
 **Trigger:** Eventos del dispositivo → **Notificación** → Notificación recibida → App: **Yape**, contenido: **Cualquiera**. Concede el *acceso a notificaciones*.
 
-**Acción:** Petición HTTP con:
+**Acción:** Solicitud HTTP con:
 
 | Clave | Valor |
 |-------|-------|
 | `entry.111111111` (tu ID de origen) | `notificacion` |
-| `entry.222222222` (tu ID de texto)  | `[notification_title] [notification]` (Magic text) |
+| `entry.222222222` (tu ID de texto)  | `{notification_title} {notification}` (Magic text) |
 
 ### Macro 2: Gastos (pantalla de constancia)
 
@@ -104,12 +104,12 @@ Crea antes una variable global de texto llamada `yape_pantalla` (MacroDroid → 
 
 **Acciones:**
 1. **Read Screen Content** → guardar en `yape_pantalla`
-2. **Petición HTTP** con:
+2. **Solicitud HTTP** con:
 
 | Clave | Valor |
 |-------|-------|
 | `entry.111111111` | `pantalla` |
-| `entry.222222222` | `[lv=yape_pantalla]` (Magic text → variable) |
+| `entry.222222222` | `{lv=yape_pantalla}` (Magic text → variable) |
 
 En las opciones de la macro, evita que se repita en menos de **10 s**.
 

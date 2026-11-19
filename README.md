@@ -1,13 +1,13 @@
 # yurmont-yape
 
-Registra automáticamente en una Google Sheet los yapeos que **recibes** y los que **haces**, desde un celular Android.
+Registra automáticamente en una Google Sheet los yapeos que **recibes** y los que **haces**, desde un celular Android. Solo usa apps gratuitas: **MacroDroid** (versión gratis, hasta 5 macros; aquí se usan 2) y Google Sheets.
 
 ```
-Te yapean ──► notificación de Yape ──► MacroDroid ─────────┐
-                                                           ├─ HTTP POST ─► Apps Script ─► Google Sheet
-Yapeas ─────► pantalla "¡Yapeaste!" ─► Tasker + AutoInput ─┘                              ├─ Raw      (todo lo recibido)
-                                                                                          ├─ Gastos   (lo que pagaste)
-                                                                                          └─ Ingresos (lo que recibiste)
+Te yapean ──► notificación de Yape ──► MacroDroid (macro 1) ─┐
+                                                             ├─ HTTP POST ─► Apps Script ─► Google Sheet
+Yapeas ─────► pantalla "¡Yapeaste!" ─► MacroDroid (macro 2) ─┘                              ├─ Raw      (todo lo recibido)
+                                                                                            ├─ Gastos   (lo que pagaste)
+                                                                                            └─ Ingresos (lo que recibiste)
 ```
 
 Yape muestra una notificación cuando te pagan, pero aparentemente no cuando pagas tú. Por eso los gastos se capturan leyendo la pantalla de constancia con el permiso de accesibilidad de Android.
@@ -25,7 +25,7 @@ Yape muestra una notificación cuando te pagan, pero aparentemente no cuando pag
 
 > Cada vez que cambies el script: **Implementar → Administrar implementaciones → Editar → Nueva versión**. Si no, la URL sigue ejecutando el código anterior.
 
-## 2. Ingresos: MacroDroid (notificaciones)
+## 2. Ingresos: macro 1 (notificaciones)
 
 **Trigger:** Eventos del dispositivo → **Notificación** → Notificación recibida
 - Aplicación: **Yape**
@@ -43,26 +43,35 @@ Yape muestra una notificación cuando te pagan, pero aparentemente no cuando pag
 | title  | `[notification_title]` (Magic text → título de la notificación) |
 | text   | `[notification]` (Magic text → texto de la notificación) |
 
-## 3. Gastos: Tasker + AutoInput (pantalla de constancia)
+## 3. Gastos: macro 2 (pantalla de constancia)
 
-Instala **Tasker** y **AutoInput** (Play Store, ambos de pago) y activa el servicio de accesibilidad de AutoInput cuando lo pida.
+Crea una variable global de tipo texto, por ejemplo `yape_pantalla` (MacroDroid → Variables).
 
-**Perfil:** Evento → Plugin → **AutoInput → UI Update**
-- Application: **Yape**
-- Text Filter: `Yapeaste`
-- En las propiedades del perfil, **Cooldown: 10 s** (la pantalla se redibuja varias veces).
+**Trigger:** **Screen content** ([wiki](https://macrodroidforum.com/wiki/index.php/Trigger:_Screen_content))
+- Aplicación: **Yape** (no uses "Todas las aplicaciones", consume más batería)
+- Texto a detectar: `*Yapeaste*` (con comodines), al **aparecer**
+- Frecuencia de lectura: **1–2 s**
+- Concede a MacroDroid el permiso de **accesibilidad** cuando lo pida.
 
-**Tarea** (acciones en orden):
-1. **Variable Set** `%ytext` = `%aitext(+ | )`  (une los textos de la pantalla con ` | `)
-2. **Variable Convert** `%ytext` → Function: **URL Encode**
-3. **Net → HTTP Request**
-   - Method: **POST**, URL: la de la aplicación web
-   - Headers: `Content-Type:application/x-www-form-urlencoded`
-   - Body: `token=TU_SECRET&source=pantalla&text=%ytext`
+**Acciones** (en orden):
+1. **Read Screen Content** → guardar el texto en `yape_pantalla`
+2. **Petición HTTP**: método **POST**, URL de la aplicación web, cuerpo **Form data**:
+
+| Clave  | Valor |
+|--------|-------|
+| token  | tu `SECRET` |
+| source | `pantalla` |
+| text   | `[lv=yape_pantalla]` (Magic text → variable `yape_pantalla`) |
+
+**Restricción (recomendada):** en las opciones de la macro, evita que se repita en menos de **10 s**, porque la pantalla se redibuja varias veces. El script además descarta el mismo pago durante 3 minutos.
+
+El texto de pantalla puede llegar con un bloque por línea; el script lo convierte a `a | b | c` antes de leerlo.
+
+**Si no detecta nada:** algunas apps no dejan leer su texto. Prueba el trigger **Screenshot Content** ([wiki](https://macrodroidforum.com/wiki/index.php/Trigger:_Screenshot_Content)), que lee la pantalla con OCR. Es menos confiable, pero sirve como respaldo.
 
 ## 4. Batería
 
-Ajustes → Apps → MacroDroid / Tasker / AutoInput → Batería → **Sin restricciones**. Si no, Android puede cerrarlas y se pierden movimientos.
+Ajustes → Apps → MacroDroid → Batería → **Sin restricciones**. Si no, Android puede cerrarla y se pierden movimientos.
 
 ## 5. Calibrar con datos reales
 
@@ -76,5 +85,5 @@ El parser se escribió con textos de ejemplo, no con pantallas reales de Yape. D
 - **Cambios en Yape:** si Yape cambia el texto o el diseño de la constancia, la captura de gastos deja de funcionar hasta ajustar el filtro. Si un gasto no aparece en Raw, revisa esto primero.
 - **Historial:** abrir el detalle de un yapeo antiguo puede mostrar "Yapeaste" y registrarlo como gasto nuevo. Bórralo de la hoja si pasa.
 - **Pagos repetidos:** dos pagos con el mismo monto a la misma persona en menos de 3 minutos (`DEDUP_SECONDS`) se registran una sola vez.
-- **Accesibilidad:** AutoInput puede leer todo lo que hay en pantalla. Mantén el filtro solo en la app Yape. Si Yape muestra advertencias o se niega a abrir con el servicio activo, desactívalo y usa otra fuente (correo o SMS).
+- **Accesibilidad:** con ese permiso, MacroDroid puede leer todo lo que hay en pantalla. Mantén el filtro solo en la app Yape. Si Yape muestra advertencias o se niega a abrir con el servicio activo, desactívalo y usa otra fuente (correo o SMS).
 - **Categoría y Nota:** en Gastos se llenan a mano, o se pueden agregar reglas al script (destinatario → categoría).

@@ -2,8 +2,8 @@
  * yurmont-yape: Yape -> Google Sheet webhook.
  *
  * Two sources post here from the Android phone:
- *   - source=notificacion  (MacroDroid): Yape push notifications, mainly payments you RECEIVE.
- *   - source=pantalla      (Tasker + AutoInput): the "¡Yapeaste!" confirmation screen, i.e. payments you MAKE.
+ *   - source=notificacion  (MacroDroid, Notification trigger): Yape push notifications, mainly payments you RECEIVE.
+ *   - source=pantalla      (MacroDroid, Screen content trigger): the "¡Yapeaste!" confirmation screen, i.e. payments you MAKE.
  *
  * Everything is logged to "Raw". Payments you make go to "Gastos", payments you receive to "Ingresos".
  * Setup: see README.md.
@@ -32,7 +32,8 @@ function doPost(e) {
 
   const source = String(data.source || 'notificacion').trim();
   const title = String(data.title || '').trim();
-  const text = String(data.text || '').trim();
+  let text = String(data.text || '').trim();
+  if (source === 'pantalla') text = normalizeScreen_(text);
   const full = (title + ' ' + text).trim();
   const now = new Date();
 
@@ -60,6 +61,11 @@ function doGet() {
   return ContentService.createTextOutput('ok');
 }
 
+// Screen text may come one block per line; normalize to "a | b | c" so the parser sees one format.
+function normalizeScreen_(text) {
+  return text.split(/\s*(?:[\r\n]+|\s\|\s)\s*/).filter(Boolean).join(' | ');
+}
+
 function parse_(s, source) {
   // Screen text arrives as "¡Yapeaste! | S/ | 25.00 | Juan P. | ..." so allow separators between S/ and the number.
   const m = s.match(/S\/\.?[\s|]*(\d[\d.,]*)/i);
@@ -67,7 +73,7 @@ function parse_(s, source) {
   const amount = toNumber_(m[1]);
 
   let kind;
-  if (source === 'pantalla') kind = 'gasto'; // Tasker only fires on the "¡Yapeaste!" screen.
+  if (source === 'pantalla') kind = 'gasto'; // The screen macro only fires on the "¡Yapeaste!" screen.
   else if (INCOME_PATTERNS.some((r) => r.test(s))) kind = 'ingreso';
   else if (EXPENSE_PATTERNS.some((r) => r.test(s))) kind = 'gasto';
   else kind = 'gasto'; // amount present but unknown wording: assume you paid; review in Raw.
@@ -164,5 +170,9 @@ function testParse() {
     ['notificacion', 'Yape actualizó sus términos'],
     ['pantalla', '¡Yapeaste! | S/ | 25.50 | Juan Pérez | 19 nov. 2026 - 10:30 a. m. | Código de seguridad | 123'],
     ['pantalla', '¡Yapeaste! | S/ 8 | a Bodega Rosita | Nro. de operación | 04512345'],
-  ].forEach(([src, s]) => Logger.log(src + ': ' + s + '  ->  ' + JSON.stringify(parse_(s, src))));
+    ['pantalla', '¡Yapeaste!\nS/\n12.90\nAna Torres\nCódigo de seguridad\n456'],
+  ].forEach(([src, s]) => {
+    const t = src === 'pantalla' ? normalizeScreen_(s) : s;
+    Logger.log(src + ': ' + t + '  ->  ' + JSON.stringify(parse_(t, src)));
+  });
 }
